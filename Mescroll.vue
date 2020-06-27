@@ -18,10 +18,18 @@ export default {
   },
   props: {
     up: Object,
-    down: Object
+    down: Object,
+    container:{
+      type:String,
+      default:""
+    }
+  },
+  destroyed(){
+    this.mescroll.destroy();
   },
   mounted: function () {
-    this.mescroll = new MeScroll(this.$refs.mescroll, {
+    let container = this.container?this.container:this.$refs.mescroll;
+    this.mescroll = new MeScroll(container, {
       up: this.up,
       down: this.down
     })
@@ -52,6 +60,3 @@ export default {
   }
 }
 </script>
-
-<style>
-</style>
