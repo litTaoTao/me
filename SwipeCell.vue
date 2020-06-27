@@ -1,14 +1,15 @@
 <template>
-	<div class="cell_container" @touchstart v-click-outside="handleClickOutside" @click="getClickHandler('cell')">
+	<div class="cell_container" @click="getClickHandler('cell')">
 		<div :style="{'transform': 'translateX('+offset+'px)','transition-duration':dragging?'0s':'0.6s'}">
-			<div ref="cellLeft" class="cell_left" @click="getClickHandler('left', true)">
+			<!-- <div ref="cellLeft" class="cell_left" @click="getClickHandler('left', true)">
 				<div>收藏</div>
 				<div>添加</div>
-			</div>
+			</div> -->
 			<div class="cell_content">SwipeCell</div>
-			<div ref="cellRight" class="cell_right" @click="getClickHandler('right', true)">
-				<div>删除</div>
-				<div>标注</div>
+			<div ref="cellRight" @touchstart v-click-outside="handleClickOutside" class="cell_right" @click="getClickHandler('right', true)">
+				<div style="background: #000;z-index: -1">删除</div>
+				<div :style="{'transform': 'translateX('+-offset/3+'px)','transition-duration':dragging?'0s':'0.6s'}">标注</div>
+				<div :style="{'transform': 'translateX('+-offset/3*2+'px)','transition-duration':dragging?'0s':'0.6s','background':'#ccc'}">删除</div>
 			</div>
 		</div>
 	</div>
@@ -60,6 +61,14 @@ export default{
 		getWidthByRef(ref) {
 			if (this.$refs[ref]) {
 				const rect = this.$refs[ref].getBoundingClientRect();
+				//
+				if(!rect.width){
+					let childWidth = 0;
+					for(const item of this.$refs[ref].children){
+						childWidth += item.getBoundingClientRect().width
+					}
+					return childWidth;
+				}
 				return rect.width;
 			}
 			return 0;
@@ -221,15 +230,15 @@ export default{
 	position: relative;
 	overflow: hidden;
 	height:48px;
-	&:active{
-		background: #e8e8e8;
-	}
 	div{
 		height: 100%;
 		.cell_content{
 			height: 100%;
 			width: 100%;
 			text-align: center;
+			&:active{
+				background: #e8e8e8;
+			}
 		}
 		.cell_left,.cell_right{
 			position: absolute;
@@ -237,9 +246,12 @@ export default{
 			height: 100%;
 			display: flex;
 			div{
-				padding: 0 20px;
+				padding: 0 15px;
+				position: absolute;
+				white-space:nowrap;
 				display: flex;
 				align-items: center;
+				background: red;
 			}
 			color: #fff;
 		}
