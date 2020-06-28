@@ -1,15 +1,15 @@
 <template>
-	<div class="cell_container" @click="getClickHandler('cell')">
+	<div class="cell_container" v-click-outside="handleClickOutside" @click="getClickHandler('cell')">
 		<div :style="{'transform': 'translateX('+offset+'px)','transition-duration':dragging?'0s':'0.6s'}">
 			<!-- <div ref="cellLeft" class="cell_left" @click="getClickHandler('left', true)">
 				<div>收藏</div>
 				<div>添加</div>
 			</div> -->
-			<div class="cell_content">SwipeCell</div>
-			<div ref="cellRight" @touchstart v-click-outside="handleClickOutside" class="cell_right" @click="getClickHandler('right', true)">
-				<div style="background: #000;z-index: -1">删除</div>
-				<div :style="{'transform': 'translateX('+-offset/3+'px)','transition-duration':dragging?'0s':'0.6s'}">标注</div>
-				<div :style="{'transform': 'translateX('+-offset/3*2+'px)','transition-duration':dragging?'0s':'0.6s','background':'#ccc'}">删除</div>
+			<div @touchend="onClick" class="cell_content">SwipeCell</div>
+			<div ref="cellRight" class="cell_right" @click="getClickHandler('right', true)">
+				<div :class="type?'divPostion':''" ref="remove" style="background:#ccc">不再关注</div>
+				<div :class="type?'divPostion':''" ref="tag" :style="type?{'transform': 'translateX('+-offset*getWidthByRef('remove')/getWidthByRef('cellRight')+'px)','transition-duration':dragging?'0s':'0.6s','background':'#000'}:''">标记</div>
+				<div :class="type?'divPostion':''" :style="type?{'transform': 'translateX('+-offset*(getWidthByRef('remove')+getWidthByRef('tag'))/getWidthByRef('cellRight')+'px)','transition-duration':dragging?'0s':'0.6s'}:''">删除</div>
 			</div>
 		</div>
 	</div>
@@ -32,6 +32,10 @@ export default{
 			type: [Number, String],
 			default: '',
 		},
+		type:{
+			type:[Number,String],
+			default:1 //0 常规   1 仿微信
+		}
 	},
 	data(){
 		return {
@@ -48,6 +52,9 @@ export default{
 			return +this.rightWidth || this.getWidthByRef('cellRight');
 		},
 	},
+	created(){
+
+	},
 	mounted() {
 		this.bindTouchEvent(this.$el);
 	},
@@ -61,7 +68,7 @@ export default{
 		getWidthByRef(ref) {
 			if (this.$refs[ref]) {
 				const rect = this.$refs[ref].getBoundingClientRect();
-				//
+				//仿微信功能使用定位时获取宽度为0，为此采用获取子元素宽度之和
 				if(!rect.width){
 					let childWidth = 0;
 					for(const item of this.$refs[ref].children){
@@ -74,7 +81,7 @@ export default{
 			return 0;
 		},
 
-		handleClickOutside(){
+		handleClickOutside(e){
 			if(this.opened) this.close()
 		},
 
@@ -245,9 +252,11 @@ export default{
 			top: 0;
 			height: 100%;
 			display: flex;
+			.divPostion{
+				position: absolute;
+			}
 			div{
 				padding: 0 15px;
-				position: absolute;
 				white-space:nowrap;
 				display: flex;
 				align-items: center;
