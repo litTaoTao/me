@@ -1,15 +1,31 @@
 <template>
-	<div class="cell_container" v-click-outside="handleClickOutside" @click="getClickHandler('cell')">
-		<div :style="{'transform': 'translateX('+offset+'px)','transition-duration':dragging?'0s':'0.6s'}">
+	<div 
+		class="cell_container" 
+		v-click-outside="handleClickOutside" 
+		@click="getClickHandler('cell')">
+		<div 
+			:style="{'transform': 'translateX('+(offset+(isElastic?elasticX:0))+'px)','transition-duration':dragging?'0s':'0.6s'}">
 			<!-- <div ref="cellLeft" class="cell_left" @click="getClickHandler('left', true)">
 				<div>收藏</div>
 				<div>添加</div>
 			</div> -->
-			<div @touchend="onClick" class="cell_content">SwipeCell</div>
-			<div ref="cellRight" class="cell_right" @click="getClickHandler('right', true)">
-				<div :class="type?'divPostion':''" ref="remove" style="background:#ccc">不再关注</div>
-				<div :class="type?'divPostion':''" ref="tag" :style="type?{'transform': 'translateX('+-offset*getWidthByRef('remove')/getWidthByRef('cellRight')+'px)','transition-duration':dragging?'0s':'0.6s','background':'#000'}:''">标记</div>
-				<div :class="type?'divPostion':''" :style="type?{'transform': 'translateX('+-offset*(getWidthByRef('remove')+getWidthByRef('tag'))/getWidthByRef('cellRight')+'px)','transition-duration':dragging?'0s':'0.6s'}:''">删除</div>
+			<div 
+				@touchend="onClick" 
+				class="cell_content">SwipeCell</div>
+			<div ref="cellRight" 
+				class="cell_right" 
+				@click="getClickHandler('right', true)">
+				<div 
+					:class="type?'divPostion':''" 
+					ref="remove" 
+					:style="{'background':'#ccc','padding-left':'10px','padding-right':10+(isElastic?Math.abs(elasticX/3):0)+'px','transition-duration':dragging?'0s':'0.6s'}">标记</div>
+				<div 
+					:class="type?'divPostion':''" 
+					ref="tag" 
+					:style="{'transform': type?'translateX('+(-offset*removeWidth/cellRightWidth-(isElastic?elasticX/3:0))+'px)':'','padding-left':'10px','padding-right':10+(isElastic?Math.abs(elasticX/3):0)+'px','transition-duration':dragging?'0s':'0.6s','background':'#000'}">不再关注</div>
+				<div 
+					:class="type?'divPostion':''" 
+					:style="{'transform': type?'translateX('+(-offset*(removeWidth+tagWidth)/cellRightWidth-(isElastic?elasticX/3*2:0))+'px)':'','padding-left':'10px','padding-right':10+(isElastic?Math.abs(elasticX/3):0)+'px','transition-duration':dragging?'0s':'0.6s'}">删除</div>
 			</div>
 		</div>
 	</div>
@@ -17,6 +33,9 @@
 <script>
 import ClickOutside from 'vue-click-outside';
 import { TouchMixin } from '@/components/mixins/touch';
+/*
+*	微信弹性功能未增加
+*/
 export default{
 	name:"SwipeCell",
 	props: {
@@ -34,13 +53,22 @@ export default{
 		},
 		type:{
 			type:[Number,String],
-			default:1 //0 常规   1 仿微信
+			default:0 //0 常规   1 仿微信
+		},
+		isElastic:{  //弹性
+			type:Boolean,
+			default:false
 		}
 	},
 	data(){
 		return {
 			offset: 0,
-			dragging: true
+			dragging: true,
+			elasticX:0,
+			removeWidth:0,
+			tagWidth:0,
+			cellRightWidth:0,
+			cellLeftWidth:0
 		}
 	},
 	computed: {
@@ -52,10 +80,12 @@ export default{
 			return +this.rightWidth || this.getWidthByRef('cellRight');
 		},
 	},
-	created(){
-
-	},
 	mounted() {
+		//防止弹性效果影响宽度
+		this.cellRightWidth = this.getWidthByRef('cellRight');
+		this.cellLeftWidth = this.getWidthByRef('cellLeft');
+		this.removeWidth = this.getWidthByRef('remove');
+		this.tagWidth = this.getWidthByRef('tag');
 		this.bindTouchEvent(this.$el);
 	},
 	mixins: [
@@ -156,12 +186,17 @@ export default{
 				if (isPrevent) {
 					this.preventDefault(event, this.stopPropagation);
 				}
-
+				
 				this.offset = this.range(
 					this.deltaX + this.startOffset,
 					-this.computedRightWidth,
 					this.computedLeftWidth
 				);
+				//增加弹性
+				if(this.computedRightWidth && this.offset === -this.computedRightWidth || this.computedLeftWidth && this.offset === this.computedLeftWidth){
+					//弹性系数
+					this.elasticX = (this.deltaX + this.startOffset - this.offset)/10;
+				}
 			}
 		},
 
@@ -169,7 +204,8 @@ export default{
 			if (this.disabled) {
 				return;
 			}
-
+			//回弹
+			this.elasticX = 0
 			if (this.dragging) {
 				this.toggle(this.offset > 0 ? 'left' : 'right');
 				this.dragging = false;
@@ -252,26 +288,23 @@ export default{
 			top: 0;
 			height: 100%;
 			display: flex;
+			color: #fff;
 			.divPostion{
 				position: absolute;
 			}
 			div{
-				padding: 0 15px;
 				white-space:nowrap;
 				display: flex;
 				align-items: center;
-				background: red;
+				background: #ccc;
 			}
-			color: #fff;
 		}
 		.cell_left{
 			left: 0;
-			background: green;
 			transform:translateX(-100%);
 		}
 		.cell_right{
 			right: 0;
-			background: red;
 			transform:translateX(100%);
 		}
 	}
