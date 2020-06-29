@@ -33,9 +33,6 @@
 <script>
 import ClickOutside from 'vue-click-outside';
 import { TouchMixin } from '@/components/mixins/touch';
-/*
-*	微信弹性功能未增加
-*/
 export default{
 	name:"SwipeCell",
 	props: {
@@ -53,7 +50,7 @@ export default{
 		},
 		type:{
 			type:[Number,String],
-			default:0 //0 常规   1 仿微信
+			default:1 //0 常规   1 仿微信
 		},
 		isElastic:{  //弹性
 			type:Boolean,
