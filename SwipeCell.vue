@@ -1,23 +1,24 @@
 <template>
-	<div 
-		class="cell_container" 
+	<div
+		class="cell_container"
+		v-click-outside="handleClickOutside"
 		@click="getClickHandler('cell')">
-		<div 
-			:style="{'transform': 'translateX('+(offset+(isElastic?elasticX:0))+'px)','transition-duration':dragging?'0s':'0.6s'}">
+		<div
+			:style="{'transform':
+			'translateX('+(offset+(isElastic?elasticX:0))+'px)','transition-duration':dragging?'0s':'0.6s'}">
 			<!-- <div ref="cellLeft" class="cell_left" @click="getClickHandler('left', true)">
 				<div>收藏</div>
 				<div>添加</div>
 			</div> -->
-			<div 
-				@touchend="onClick" 
+			<div
+				@touchend="onClick"
 				class="cell_content">SwipeCell</div>
-			<div ref="cellRight" 
+			<div ref="cellRight"
 				class="cell_right"
-				v-click-outside="handleClickOutside" 
 				@click="getClickHandler('right', true)">
-				<div 
-					:class="type?'divPostion':''" 
-					ref="remove" 
+				<div
+					:class="type?'divPostion':''"
+					ref="remove"
 					:style="{'background':'#ccc','padding-left':'10px','padding-right':10+(isElastic?Math.abs(elasticX/3):0)+'px','transition-duration':dragging?'0s':'0.6s'}">标记</div>
 				<div 
 					:class="type?'divPostion':''" 
@@ -48,6 +49,7 @@ export default{
 			type: [Number, String],
 			default: '',
 		},
+		//
 		type:{
 			type:[Number,String],
 			default:1 //0 常规   1 仿微信
@@ -61,6 +63,7 @@ export default{
 		return {
 			offset: 0,
 			dragging: true,
+			//-位移
 			elasticX:0,
 			removeWidth:0,
 			tagWidth:0,
