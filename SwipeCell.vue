@@ -1,7 +1,6 @@
 <template>
 	<div 
 		class="cell_container" 
-		v-click-outside="handleClickOutside" 
 		@click="getClickHandler('cell')">
 		<div 
 			:style="{'transform': 'translateX('+(offset+(isElastic?elasticX:0))+'px)','transition-duration':dragging?'0s':'0.6s'}">
@@ -13,7 +12,8 @@
 				@touchend="onClick" 
 				class="cell_content">SwipeCell</div>
 			<div ref="cellRight" 
-				class="cell_right" 
+				class="cell_right"
+				v-click-outside="handleClickOutside" 
 				@click="getClickHandler('right', true)">
 				<div 
 					:class="type?'divPostion':''" 
@@ -54,7 +54,7 @@ export default{
 		},
 		isElastic:{  //弹性
 			type:Boolean,
-			default:false
+			default:true
 		}
 	},
 	data(){
