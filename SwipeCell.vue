@@ -1,6 +1,7 @@
 <template>
 	<div
 		class="cell_container"
+		@touchstart
 		v-click-outside="handleClickOutside"
 		@click="getClickHandler('cell')">
 		<div
@@ -11,8 +12,8 @@
 				<div>添加</div>
 			</div> -->
 			<div
-				@touchend="onClick"
-				class="cell_content">SwipeCell</div>
+				@touchend="onClick()"
+				:class="offset?'cell_content':'cell_content_active'">SwipeCell</div>
 			<div ref="cellRight"
 				class="cell_right"
 				@click="getClickHandler('right', true)">
@@ -176,7 +177,6 @@ export default{
 			if (this.disabled) {
 				return;
 			}
-
 			this.touchMove(event);
 			if (this.direction === 'horizontal') {
 				this.dragging = true;
@@ -198,6 +198,10 @@ export default{
 					//弹性系数
 					this.elasticX = (this.deltaX + this.startOffset - this.offset)/4;
 				}
+			}else{
+				//上下滑动后取消close
+				this.dragging = true;
+				this.lockClick = true;
 			}
 		},
 
@@ -273,10 +277,16 @@ export default{
 .cell_container{
 	position: relative;
 	overflow: hidden;
-	height:48px;
+	line-height: 68px;
+	height:68px;
 	div{
 		height: 100%;
 		.cell_content{
+			height: 100%;
+			width: 100%;
+			text-align: center;
+		}
+		.cell_content_active{
 			height: 100%;
 			width: 100%;
 			text-align: center;
