@@ -52,7 +52,7 @@ export default{
 		//
 		type:{
 			type:[Number,String],
-			default:1 //0 常规   1 仿微信
+			default:1 //0 常规   1 定位
 		},
 		isElastic:{  //弹性
 			type:Boolean,
@@ -98,7 +98,7 @@ export default{
 		getWidthByRef(ref) {
 			if (this.$refs[ref]) {
 				const rect = this.$refs[ref].getBoundingClientRect();
-				//仿微信功能使用定位时获取宽度为0，为此采用获取子元素宽度之和
+				//type=1定位时获取宽度为0，为此采用获取子元素宽度之和
 				if(!rect.width){
 					let childWidth = 0;
 					for(const item of this.$refs[ref].children){
@@ -182,7 +182,6 @@ export default{
 				this.dragging = true;
 				this.lockClick = true;
 				const isPrevent = !this.opened || this.deltaX * this.startOffset < 0;
-
 				if (isPrevent) {
 					this.preventDefault(event, this.stopPropagation);
 				}
@@ -194,8 +193,10 @@ export default{
 				);
 				//增加弹性
 				if(this.computedRightWidth && this.offset === -this.computedRightWidth || this.computedLeftWidth && this.offset === this.computedLeftWidth){
+					//
+					this.preventDefault(event, this.stopPropagation);
 					//弹性系数
-					this.elasticX = (this.deltaX + this.startOffset - this.offset)/10;
+					this.elasticX = (this.deltaX + this.startOffset - this.offset)/4;
 				}
 			}
 		},
